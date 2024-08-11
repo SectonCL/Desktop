@@ -1,4 +1,4 @@
-# ![image](https://github.com/user-attachments/assets/abd904c6-609c-4bb9-afed-fea421871547) SCLDesktop
+# ![desktop window](https://github.com/user-attachments/assets/c1dcb618-5fba-4f7c-8ae5-3a420564dabd) SCLDesktop
 
 Reinventing the good old feel of Desktops, 0.1 done in 4 days.
 
@@ -30,23 +30,24 @@ Desktop Manipulator - Task Manager/System Monitor like program
 * [ ] Run SCL Scripts and commands
 * [ ] SCL OS Port
 * [X] Pockets
-  * [ ] Show Hidden Devices
-  * [ ] Time
+  * [X] Show Hidden Devices
+  * [X] Time
   * [ ] Notifications and system errors
-* [ ] Functionality:
+* [X] Functionality:
   * [X] Service
-  * [ ] Device
-  * [ ] All of the Elements
+  * [X] Device
+  * [X] All of the Elements
 
 ## Programs
 * [X] TestService (an example for Developers)
+* [X] TestDevice (an example for Developers)
 * [ ] Configuration
   * [ ] CPU Throttling (for emulating slow PDAs)
   * [ ] Change background picture
   * [ ] Persistent changes
   * [ ] Adding and modifying colleagues
 * [ ] PDA Actions
-  * [ ] Shutdown
+  * [X] Shutdown
   * [ ] Restart
 * [ ] Desktop Manipulator
   * [ ] Disconnect Service/Device
@@ -59,3 +60,7 @@ Desktop Manipulator - Task Manager/System Monitor like program
   * [ ] Delete
   * [ ] Move
 * [ ] Notes Writer
+
+## Evolution of Desktop (hover to see version)
+![0.1](https://github.com/user-attachments/assets/abd904c6-609c-4bb9-afed-fea421871547)
+![0.2 (lost to time)](https://github.com/user-attachments/assets/b42ae7ec-3dbf-4c72-99dc-26b45758548a)

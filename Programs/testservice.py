@@ -9,7 +9,7 @@ class Program(deskinfo.Application):
         print("A Test Service has been succesfully launched.")
     
     def think(self):
-        deskfuncs.queue_text(0, 48, text="Hello World!", centered=False, shadowed=True)
+        deskfuncs.queue_text(0, 48, text="Hello World!", anchor="nw", shadowed=True)
     
     def shutdown(self):
         super().shutdown()

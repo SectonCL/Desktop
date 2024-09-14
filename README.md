@@ -1,4 +1,4 @@
-# ![desktop window](https://github.com/user-attachments/assets/c1dcb618-5fba-4f7c-8ae5-3a420564dabd) SCLDesktop
+# ![desktop window](https://github.com/user-attachments/assets/33eca0d7-a422-4c08-805f-471b1cd7f788) SCLDesktop
 
 Reinventing the good old feel of Desktops, 0.1 done in 4 days.
 
@@ -64,3 +64,4 @@ Desktop Manipulator - Task Manager/System Monitor like program
 ## Evolution of Desktop (hover to see version)
 ![0.1](https://github.com/user-attachments/assets/abd904c6-609c-4bb9-afed-fea421871547)
 ![0.2 (lost to time)](https://github.com/user-attachments/assets/b42ae7ec-3dbf-4c72-99dc-26b45758548a)
+![0.3, last tkinter version](https://github.com/user-attachments/assets/c1dcb618-5fba-4f7c-8ae5-3a420564dabd)

@@ -21,8 +21,9 @@ Disconnect Service/Device - Kill Process
 
 Desktop Manipulator - Task Manager/System Monitor like program
 
+## Plans
 
-## Features
+### Features
 * [X] PROGRAMS menu
 * [ ] First-time setup
 * [ ] Expert mode
@@ -38,7 +39,7 @@ Desktop Manipulator - Task Manager/System Monitor like program
   * [ ] Device
   * [ ] All of the Elements
 
-## Programs
+### Programs
 * [X] TestService (an example for Developers)
 * [ ] Configuration
   * [ ] CPU Throttling (for emulating slow PDAs)
@@ -59,3 +60,12 @@ Desktop Manipulator - Task Manager/System Monitor like program
   * [ ] Delete
   * [ ] Move
 * [ ] Notes Writer
+
+### Elements
+* [X] Device
+* [X] Button
+* [X] List
+* [X] Options Button
+* [X] Book (horizontal list)
+* [X] Slider
+* [ ] Input

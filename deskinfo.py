@@ -1,12 +1,44 @@
 import os
+import skia
 from fileinput import close
 
+
+"""DRAWINGQUEUE Explanation:
+DrawingQueue is a dictionary that contains only 3 levels of draw access:
+  0: Draw before everything
+  1: Draw in Device
+  2: Draw after everything
+
+They're all equal to a list that contains instruction dictionaries:
+Example of a DDQ file (Desktop Drawing Queue):
+	Type: Text
+	Position: [128, 128]
+	Color: White
+	Label: "Hello world!"
+	Angle: 5.0
+	Shadows: Yes
+	Shadow Offset: [3, 3]
+	Shadow Blur: 3.0
+	Outline: Yes
+	Outline Color: Black
+	Outline Range: 1.0
+	Priority: 2
+DDQ lets you draw stuff without coding it.
+Planned DDQ Rules:
+	1. Every `Type` style splits the DDQ file, that means you can draw multiple things from one DDQ file
+	2. Style names can be any case and with spaces. That means that `Draw This Thing` will translate to `drawthisthing`.
+	3. Style name and value should be between `: `. That means you should always split them with colon and a space.
+	4. Booleans can be either `True` `False` or `Yes` `No` 
+	5. Colors, `Type` values, booleans must not be contained in quotes.
+	6. Parser will ignore EVERY line that starts with `//`. That means you can write comments!
+"""
 drawingQueue = {
 	0: [],
 	1: [],
 	2: []
-}; """don't you dare hack this"""
-debugMode = False; """Makes some calculations visualized"""
+}
+
+debugMode = True; """Makes some calculations visualized"""
 interval = []; """CPU Calculation time"""
 clickOnce = False; """Activates special things once, like buttons"""
 desktopIsDoing = False; """Desktop is very busy"""
@@ -15,6 +47,7 @@ mousePos = [0, 0]
 mouseEvents = [False, False, False]; """Current Mouse clicks in right order: Left, Middle (Scroll Button), Right"""
 screenSize = [640, 480]
 detailLevel = 2; """How detailed do we render screen, 0 is classic."""
+useAnimations = True
 
 availableApplications = []; """Everything from ./Programs"""
 runningApplications = []; """The Applications that are currently running, those are Devices and even services."""

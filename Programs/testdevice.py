@@ -23,7 +23,8 @@ class Program(deskinterface.Elements.Device):
         toggleButton.size = [64, 24]
         toggleButton.toggle = True
         testSlider = deskinterface.Elements.Slider()
-        testSlider.pos = [32, 164]
+        testSlider.pos = [32, 96]
+        testSlider.size = [512, 16]
         testSlider.roundToDigits = 1
         self.drawElements.append(testButton)
         self.drawElements.append(toggleButton)

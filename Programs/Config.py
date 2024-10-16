@@ -7,6 +7,7 @@ class Program(deskinterface.Elements.Device):
     devtitle = "Configuration"
     needsExpert = True
     detailSlider = deskinterface.Elements.Slider()
+    ScreenBox = deskinterface.EnhancedElements.ListBox()
     
     def __init__(self):
         super().__init__()
@@ -20,7 +21,11 @@ class Program(deskinterface.Elements.Device):
         self.detailSlider.min = 0.0
         self.detailSlider.max = 2.0
         self.detailSlider.current = deskinfo.detailLevel
+
+        self.ScreenBox.pos = [32, 32]
+        self.ScreenBox.options = ["640 by 480", "800 by 600", "1280 by 720"]
         self.drawElements.append(self.detailSlider)
+        self.drawElements.append(self.ScreenBox)
     
     def think(self):
         super().think()

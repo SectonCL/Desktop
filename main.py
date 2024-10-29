@@ -1,7 +1,11 @@
-import time
+# Save processing time by putting this into the very beginning
 import os
+if os.environ["XDG_SESSION_TYPE"] == "wayland": exit("Skia cannot create GL context in Wayland!\n"
+													 "We suggest you launch this through Xwayland or start your compositor in X11 mode.\n"
+													 "Please contact the Skia devs for the Wayland support of Skia. We can't do anything about this, really.")
+import time
 import sys
-import playsound
+import mpv
 
 import skia
 import contextlib
@@ -14,7 +18,6 @@ import deskinfo
 import deskfuncs
 
 isMenuOpened = False
-# bgImage = tkinter.PhotoImage(file="./Assets/bg.png")
 
 for file in os.listdir("./Programs"):
 	if os.path.isfile("./Programs/" + file):
@@ -27,7 +30,6 @@ def glfw_window():
 	if not glfw.init(): raise RuntimeError('GLFW Initialization has completely failed. Too bad!')
 	glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
 	glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 2)
-	if os.environ["XDG_SESSION_TYPE"] == "wayland" and sys.argv[0].lower() != "force_wayland": exit("Skia does not support Wayland.")
 	glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, True)
 	glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
 	glfw.window_hint(glfw.STENCIL_BITS, 8)
@@ -65,7 +67,7 @@ def skia_surface():
 
 if os.name == "posix":
 	monospaceFont = skia.Font(skia.Typeface('Classic Console'), 24)
-	standardFont = skia.Font(skia.Typeface('Bahnschrift'), 24)
+	standardFont = skia.Font(skia.Typeface(), 16)
 
 class Desktop(deskinfo.Application):
 	name = "Environment"
@@ -98,7 +100,6 @@ class Desktop(deskinfo.Application):
 						deskinfo.devices[deskinfo.drawDeviceIndex].shutdown()
 						deskinfo.devices.pop(deskinfo.drawDeviceIndex)
 						deskinfo.drawDeviceIndex = -1
-					else: print("Desktop ActionsButton, option_clicked 'CLOSE': Nothing to close!")
 				case 4: deskinfo.drawDeviceIndex = -1
 
 	class Pockets(deskinterface.Elements.Book):
@@ -141,32 +142,28 @@ class Desktop(deskinfo.Application):
 			# super().logic() # override standard logic
 			# With this:
 			self.size[1] = deskinfo.screenSize[1] - 32
-			deskfuncs.queue_draw([self.pos[0], self.pos[1]], [self.size[0], self.size[1]], "white", True)
+			deskfuncs.queue_draw([self.pos[0], self.pos[1]], [self.size[0], self.size[1]], "white", True, priority=2)
 			for idx, item in enumerate(self.items):
-				if deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], self.pos[0], self.pos[1] + idx * 18, self.size[0], 18):
-					deskfuncs.queue_draw([self.pos[0], self.pos[1] + idx * 18], [self.size[0], 18], (0, 178, 255, 125), True)
+				if deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], self.pos[0], self.pos[1] + idx * 20, self.size[0], 18):
+					deskfuncs.queue_draw([self.pos[0], self.pos[1] + idx * 20], [self.size[0], 20], (0, 178, 255, 125), True, priority=2)
 					if deskinfo.clickOnce: self.itemClicked(idx)
-				deskfuncs.queue_text([self.pos[0] + 2, self.pos[1] + idx * 18], "black", item.name, False)
+				deskfuncs.queue_text([self.pos[0] + 2, self.pos[1] + idx * 20], "black", item.name, False, priority=2)
 
 	popmenu2 = PopUPMenu()  # why do i have to do it like this...
 	actbut2 = ActionsButton()
 	pock2 = Pockets()
-	yPosTween1 = None
+	yPosTween1 = deskfuncs.Tween(curDecoMenuPos, 0.0, 0.5)
 
 	def logic(self):
 		deskinfo.drawingQueue[0].clear()
 		deskinfo.drawingQueue[1].clear()
 		deskinfo.drawingQueue[2].clear()
 		global window
+		touchingButton = deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], 0, deskinfo.screenSize[1] - 32, 98, 32)
 
 		if glfw.get_cursor_pos(window) >= (0.0, 0.0): deskinfo.mousePos = glfw.get_cursor_pos(window)
 		if len(deskinfo.interval) != 0: deskinfo.interval[0] = time.time()
 		else: deskinfo.interval.append(time.time())
-		if deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], 0, deskinfo.screenSize[1] - 32, 98, 32):
-			self.yPosTween1 = deskfuncs.tween(self.curDecoMenuPos, 16.0, 0.25)
-			deskfuncs.queue_draw([8, deskinfo.screenSize[1] - 6], [84, 1], color="black")
-			if deskinfo.clickOnce: self.toggleMenu()
-		else: self.yPosTween1 = deskfuncs.tween(self.curDecoMenuPos, 0.0, 0.25)
 
 		# Give thinking to opened applications
 		for service in deskinfo.runningApplications:
@@ -176,20 +173,23 @@ class Desktop(deskinfo.Application):
 
 		self.Pockets.logic(self.pock2)
 		if isMenuOpened:
-			self.yPosTween1 = deskfuncs.tween(self.curDecoMenuPos, 32.0, 0.5)
-			if not deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], 0, deskinfo.screenSize[1] - 32, 98, 32):
-				deskfuncs.queue_draw([8, deskinfo.screenSize[1] - 22], [84, 1], color="black")
-			deskfuncs.queue_text([8, deskinfo.screenSize[1] + 12 - self.curDecoMenuPos], text="CLOSE", color="black")
+			self.yPosTween1.changeEndValue(32.0)
+			if not touchingButton:
+				self.yPosTween1.changeEndValue(24.0)
 			self.PopUPMenu.logic(self.popmenu2)
 		else:
-			deskfuncs.queue_text([8, deskinfo.screenSize[1] - 12 - self.curDecoMenuPos], text="PROGRAMS", color="black")
-			deskfuncs.queue_text([4, deskinfo.screenSize[1] - 14 - self.curDecoMenuPos], text="PROGRAMS")
+			if touchingButton:
+				self.yPosTween1.changeEndValue(8.0)
+			else:
+				self.yPosTween1.changeEndValue(0.0)
+
+		if deskinfo.clickOnce and touchingButton: self.toggleMenu()
+		deskfuncs.queue_text([8, deskinfo.screenSize[1] + 4 - self.curDecoMenuPos], text="CLOSE", shadowed=True)
+		deskfuncs.queue_text([4, deskinfo.screenSize[1] - 22 - self.curDecoMenuPos], text="PROGRAMS", shadowed=True)
 		self.ActionsButton.logic(self.actbut2)
 		if deskinfo.mouseEvents[0] and deskinfo.clickOnce: deskinfo.clickOnce = False  # Make sure that clickOnce actually clicksOnce
 
-		deskfuncs.queue_draw([0, deskinfo.screenSize[0] - self.curDecoMenuPos], [100, deskinfo.screenSize[1]], "white")
-
-		if self.yPosTween1 is not None: self.curDecoMenuPos = self.yPosTween1()
+		self.curDecoMenuPos = self.yPosTween1.update()
 
 		deskinfo.prevMousePos = deskinfo.mousePos
 
@@ -197,7 +197,10 @@ class Desktop(deskinfo.Application):
 desk = Desktop()
 
 
+bgImage = skia.Image.open("./Assets/bg.png")
+cursor = skia.Image.open("./Assets/cursor.png")
 def redraw(surfaceRef):
+	global bgImage
 	surfaceRef = surfaceRef.getCanvas()
 	# if deskinfo.surfaceRef is not None: surfaceRef = deskinfo.surfaceRef
 	# else: print("No surfaceRef here!"); exit(404)
@@ -211,9 +214,7 @@ def redraw(surfaceRef):
 					if instruction[4]:
 						match deskinfo.detailLevel:
 							case 0: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 0.0, 0.0, skia.ColorBLACK))
-							case 1: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 0.0, 0.0, skia.Color(0, 0, 0, 155)))
-							case 2: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 3.0, 3.0, skia.ColorBLACK))
-							case _: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 0.0, 0.0, skia.ColorBLACK))
+							case _: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 3.0, 3.0, skia.ColorBLACK))
 					surfaceRef.drawRect(skia.Rect.MakeXYWH(float(instruction[1][0]), float(instruction[1][1]), float(instruction[2][0]), float(instruction[2][1])), painter)
 				case 1:
 					# if rotation != 0.0: processingCMD += f", angle=-{rotation}"
@@ -221,84 +222,51 @@ def redraw(surfaceRef):
 					if instruction[4]:
 						match deskinfo.detailLevel:
 							case 0: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 0.0, 0.0, skia.ColorBLACK))
-							case 1: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 0.0, 0.0, skia.Color(0, 0, 0, 155)))
-							case 2: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 3.0, 3.0, skia.ColorBLACK))
-							case _: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 0.0, 0.0, skia.ColorBLACK))
+							case _: painter.setImageFilter(skia.ImageFilters.DropShadow(3.0, 3.0, 3.0, 3.0, skia.ColorBLACK))
 					painter.setColor(skia.Color(instruction[3][0], instruction[3][1], instruction[3][2], instruction[3][3]))
-					painter.setAntiAlias(False)
-					surfaceRef.drawString(instruction[2], instruction[1][0], instruction[1][1] + instruction[5], monospaceFont, painter)
+					surfaceRef.drawString(instruction[2], instruction[1][0], instruction[1][1] + instruction[5], standardFont, painter)
 				case 2:
-					painter: skia.Paint = skia.Paint()
-					line = skia.Path()
-					line.moveTo(instruction[1][0], instruction[1][1])
-					line.lineTo(instruction[2][0], instruction[2][1])
-
+					painter: skia.Paint = skia.Paint(Color=skia.Color(instruction[3][0], instruction[3][1], instruction[3][2], instruction[3][3]))
 					if instruction[4]:
 						match deskinfo.detailLevel:
 							case 0: painter.setImageFilter(skia.ImageFilters.DropShadow(line, 3.0, 3.0, 0.0, 0.0, skia.ColorBLACK))
-							case 1: painter.setImageFilter(skia.ImageFilters.DropShadow(line, 3.0, 3.0, 0.0, 0.0, skia.Color(0, 0, 0, 155)))
-							case 2: painter.setImageFilter(skia.ImageFilters.DropShadow(line, 3.0, 3.0, 5.0, 5.0, skia.ColorBLACK))
-
-					surfaceRef.drawPath(line, painter)
+							case _: painter.setImageFilter(skia.ImageFilters.DropShadow(line, 3.0, 3.0, 5.0, 5.0, skia.ColorBLACK))
+					surfaceRef.drawLine(instruction[1][0], instruction[1][1], instruction[2][0], instruction[2][1], painter)
 	# </drawInstructions>
 
 	# BG
-	image = skia.Image.open("./Assets/bg.png")
-	surfaceRef.drawImage(image, 0.0, 0.0)
+	if [bgImage.width(), bgImage.height()] == deskinfo.screenSize:
+		bgRect = skia.Rect(0, 0, deskinfo.screenSize[0], deskinfo.screenSize[1])
+	else:
+		bgRect = skia.Rect(deskinfo.screenSize[0] / 2 - bgImage.width() / 2,
+						   deskinfo.screenSize[1] / 2 - bgImage.height() / 2,
+						   deskinfo.screenSize[0] / 2 + bgImage.width()  / 2,
+						   deskinfo.screenSize[1] / 2 + bgImage.height() / 2)
+	if deskinfo.detailLevel <= 0: modBG = bgImage.convert(skia.ColorType.kRGB_888x_ColorType, skia.AlphaType.kOpaque_AlphaType)
+	else: modBG = bgImage
+	surfaceRef.drawImageRect(modBG, dst=bgRect)
 
 	# Before EVERYTHING
 	drawInstructions(deskinfo.drawingQueue[0])
 
 	curPaint = skia.Paint(Color=skia.ColorWHITE)
-	curText = skia.TextBlob("SCLDesktop v0.5 Beta", monospaceFont)
-	surfaceRef.drawTextBlob(curText, 8, 24, curPaint)
-
-	curPaint.setColor(skia.ColorBLACK)
-	curText = skia.TextBlob(time.strftime("%H:%M"), monospaceFont)
-	surfaceRef.drawTextBlob(curText, deskinfo.screenSize[0] - 46, deskinfo.screenSize[1] - 14, curPaint)
+	curText = skia.TextBlob(f"SCLDesktop {deskinfo.version} {deskinfo.edition}", standardFont)
+	surfaceRef.drawTextBlob(curText, deskinfo.screenSize[0] - curText.bounds().width() - 16, deskinfo.screenSize[1] - 48, curPaint)
 
 	curPaint.setColor(skia.ColorWHITE)
-	curText = skia.TextBlob(time.strftime("%H:%M"), monospaceFont)
-	surfaceRef.drawTextBlob(curText, deskinfo.screenSize[0] - 48, deskinfo.screenSize[1] - 16, curPaint)
+	curText = skia.TextBlob(time.strftime("%H:%M"), standardFont)
+	surfaceRef.drawTextBlob(curText, deskinfo.screenSize[0] - 8, deskinfo.screenSize[1] - 16, curPaint)
 
 
 	# On Devices
 	drawInstructions(deskinfo.drawingQueue[1])
 
-	# Cursor (ALWAYS THE LAST!)
-	if deskinfo.detailLevel > 1:
-		curBlur = skia.Path()
-		painter = skia.Paint(AntiAlias=True)
-		# dpg.draw_line([deskinfo.mousePos[0] - deskinfo.get_mousespeed()[0],
-		# 			   deskinfo.mousePos[1] - deskinfo.get_mousespeed()[1]],
-		# 			  [deskinfo.mousePos[0],  deskinfo.mousePos[1]],
-		# 			  color=(0, 0, 0, 255), thickness=4.0)
-		painter.setStrokeWidth(4.0)
-		painter.setColor(skia.ColorBLACK)
-		curBlur.moveTo(deskinfo.mousePos[0] - deskinfo.get_mousespeed()[0], deskinfo.mousePos[1] - deskinfo.get_mousespeed()[1])
-		curBlur.lineTo(deskinfo.mousePos[0], deskinfo.mousePos[1])
-		surfaceRef.drawPath(curBlur, painter)
-		# dpg.draw_line([deskinfo.mousePos[0] - deskinfo.get_mousespeed()[0],
-		# 			   deskinfo.mousePos[1] - deskinfo.get_mousespeed()[1]],
-		# 			  [deskinfo.mousePos[0], deskinfo.mousePos[1]],
-		# 			  color=(255, 255, 255, 255), thickness=2.0)
-		painter.setStrokeWidth(2.0)
-		painter.setColor(skia.ColorWHITE)
-		curBlur.moveTo(deskinfo.mousePos[0] - deskinfo.get_mousespeed()[0], deskinfo.mousePos[1] - deskinfo.get_mousespeed()[1])
-		curBlur.lineTo(deskinfo.mousePos[0], deskinfo.mousePos[1])
-		surfaceRef.drawPath(curBlur, painter)
-	# dpg.draw_rectangle([deskinfo.mousePos[0] - 2, deskinfo.mousePos[1] - 2],
-	# 				   [deskinfo.mousePos[0] + 2, deskinfo.mousePos[1] + 2], color=(0, 0, 0, 255),
-	# 				   fill=(255, 255, 255, 255), thickness=1.0)
-	deskfuncs.queue_draw([deskinfo.mousePos[0] - 2, deskinfo.mousePos[1] - 2], [4, 4], "white", priority=2)
-	curPainter = skia.Paint()
-	curPainter.setStyle(skia.Paint.kStroke_Style)
-	curPainter.setStrokeWidth(2)
-	surfaceRef.drawRect(skia.Rect.MakeXYWH(deskinfo.mousePos[0] - 2, deskinfo.mousePos[1] - 2, 4, 4), curPainter)
-
-
 	# After EVERYTHING
 	drawInstructions(deskinfo.drawingQueue[2])
+
+	# Cursor (ALWAYS THE LAST!)
+	surfaceRef.drawImageRect(cursor, dst=skia.Rect.MakeXYWH(deskinfo.mousePos[0], deskinfo.mousePos[1], 24, 31))
+
 
 	if len(deskinfo.interval) == 2: deskinfo.interval[1]  =  time.time()
 	else                          : deskinfo.interval.append(time.time())
@@ -323,7 +291,7 @@ def sizeRegister(sizeWindow, sizeWidth, sizeHeight):
 
 reRun = False
 with glfw_window() as window:
-	# playsound.playsound("./Assets/startup.ogg", False)
+	# mpv.MPV().play("./Assets/Startup.ogg")
 	def main():
 		global reRun
 		global desk
@@ -343,4 +311,3 @@ with glfw_window() as window:
 		reRun = False
 		main()
 		if glfw.window_should_close(window): break
-		print("RERUNNING! This might break some stuff.")

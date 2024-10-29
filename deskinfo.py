@@ -1,64 +1,61 @@
+"""SCLDesktop - DeskInfo
+Contains pretty much every information about current session - from version to drawing queue.
+It is also automatically updated.
+You can, for example, get the screen size here or the mouse position.
+You have the power to modify them, because... It's a python script of course!"""
+import enum
 import os
 import skia
 from fileinput import close
 
 
-"""DRAWINGQUEUE Explanation:
-DrawingQueue is a dictionary that contains only 3 levels of draw access:
-  0: Draw before everything
-  1: Draw in Device
-  2: Draw after everything
+"""DrawingQueue is a dictionary that contains only 3 levels of draw access:
+  0. Draw before everything
+  1. Draw in Device
+  2. Draw after everything
 
-They're all equal to a list that contains instruction dictionaries:
-Example of a DDQ file (Desktop Drawing Queue):
-	Type: Text
-	Position: [128, 128]
-	Color: White
-	Label: "Hello world!"
-	Angle: 5.0
-	Shadows: Yes
-	Shadow Offset: [3, 3]
-	Shadow Blur: 3.0
-	Outline: Yes
-	Outline Color: Black
-	Outline Range: 1.0
-	Priority: 2
-DDQ lets you draw stuff without coding it.
-Planned DDQ Rules:
-	1. Every `Type` style splits the DDQ file, that means you can draw multiple things from one DDQ file
-	2. Style names can be any case and with spaces. That means that `Draw This Thing` will translate to `drawthisthing`.
-	3. Style name and value should be between `: `. That means you should always split them with colon and a space.
-	4. Booleans can be either `True` `False` or `Yes` `No` 
-	5. Colors, `Type` values, booleans must not be contained in quotes.
-	6. Parser will ignore EVERY line that starts with `//`. That means you can write comments!
-"""
-drawingQueue = {
-	0: [],
-	1: [],
-	2: []
-}
+They're all equal to a list that contains instruction lists:
+	0: Instruction Type (0 is Rectangle, 1 is Text and 2 is Line)
+	1: Position
+	2:
+		For Rectangles, the size
+		For Text, the text, literally.
+		For lines, the ending position (not relative)
+	3:
+""" # TODO: Finish this comment!
+drawingQueue = {0: [], 1: [], 2: []}
+directDraw   = {0: [], 1: [], 2: []}
+"""DirectDraw: Not to be confused with Micro$oft's DX.
+Example for text:
+	0. Type (0: Rectangle, 1: TextBlob, 2: Path)
+	1. Drawable (TextBlob)
+	2. Painter (Paint)
+Read more info in Docs."""
 
-debugMode = True; """Makes some calculations visualized"""
-interval = []; """CPU Calculation time"""
-clickOnce = False; """Activates special things once, like buttons"""
-desktopIsDoing = False; """Desktop is very busy"""
-prevMousePos = [0, 0]; """Mouse Position in a previous frame; useful for calculation of Mouse Velocity (it's already done, get_mousespeed().)"""
+version = 0.5
+edition = "Developer Preview";         """Something like "Beta", or "Alpha"."""
+debugMode = False;        """Makes some calculations visualized"""
+interval = [];            """CPU Calculation time"""
+desktopIsBusy = False;    """Desktop is very busy"""
+screenSize = [1280, 960]
+
+prevMousePos = [0, 0];               """Mouse Position in a previous frame."""
 mousePos = [0, 0]
+clickOnce = False;                   """Activates special things once, like buttons. Is true only on first frame the LMB is pressed"""
 mouseEvents = [False, False, False]; """Current Mouse clicks in right order: Left, Middle (Scroll Button), Right"""
-screenSize = [640, 480]
-detailLevel = 2; """How detailed do we render screen, 0 is classic."""
+
+detailLevel = 1;      """How detailed do we render screen, 0 is classic."""
 useAnimations = True
 
 availableApplications = []; """Everything from ./Programs"""
-runningApplications = []; """The Applications that are currently running, those are Devices and even services."""
-devices = []; """The Devices that were hidden in pockets, we need to remember them for variables"""
-drawDeviceIndex = -1; """If index equals to -1, then don't render any device."""
+runningApplications = [];   """The Applications that are currently running, those are Devices and even services."""
+devices = [];               """The Devices that were hidden in pockets, we need to remember them for variables"""
+drawDeviceIndex = -1;       """If index equals to -1, then don't render any device."""
 
 def get_deltatime() -> float:
 	if len(interval) == 2: return interval[1] - interval[0]
 
-def get_mousespeed() -> list[int]:
-	return [mousePos[0] - prevMousePos[0], mousePos[1] - prevMousePos[1]]
+def get_mousespeed() -> list[int]: return [mousePos[0] - prevMousePos[0], mousePos[1] - prevMousePos[1]]
 
 class Application:
 	__type__: str = "service"
@@ -69,12 +66,8 @@ class Application:
 	secretDevice: bool = False
 	singular: bool = False; """Limit launching this Application to one process"""
 
-	def __init__(self):
-		print("Starting " + self.name)
-
-	def shutdown(self):
-		print("Closing " + self.name)
-		self.close = True
+	def __init__(self): print("Starting " + self.name)
+	def shutdown(self): print("Closing " + self.name); self.close = True
 
 class DeviceElement:
 	__type__: str = "element"

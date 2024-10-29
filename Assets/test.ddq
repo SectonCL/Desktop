@@ -1,0 +1,12 @@
+Type: "text"
+Position: [128, 128]
+Color: "white"
+Label: "Hello world!"
+Angle: 5.0
+Shadows: Yes
+Shadow Offset: [3, 3]
+Shadow Blur: 3.0
+Outline: Yes
+Outline Color: "black"
+Outline Range: 1.0
+Priority: 2

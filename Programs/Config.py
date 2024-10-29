@@ -12,9 +12,7 @@ class Program(deskinterface.Elements.Device):
     def __init__(self):
         super().__init__()
         print("We hope you already received a warning about running unknown devices/commands/SCLipts in SCLDesktop. "
-              "Just in case you didn't, listen REALLY carefully: SCLDesktop and the SCL itself are not isolated "
-              "from your host system. That is the case if you are not running this under SCLOS, but even then "
-              "a malicious program can enter other drives.\n"
+              "Just in case you didn't, listen REALLY carefully: SCLDesktop and the SCL itself are not isolated from your host system.\n"
               "We are NOT responsible for any damages done by any malicious device/command/SCLipt you run, so think twice!!!")
         self.detailSlider.pos = [128, 16]
         self.detailSlider.roundToDigits = 0

@@ -1,17 +1,28 @@
 import skia
+import time
 
 import deskinfo
-import time
 
 def colorNameToList(name: str, alpha: int = 255) -> list[int]:
 	"""Available colors: black,white,red,green,blue"""
 	match name:
-		case "black": return [ 0 , 0 , 0 ,alpha]
-		case "gray" : return [100,100,100,alpha]
-		case "white": return [255,255,255,alpha]
-		case "red"  : return [255, 0 , 0 ,alpha]
-		case "green": return [ 0 ,255, 0 ,alpha]
-		case "blue" : return [ 0 , 0 ,255,alpha]
+		case "black" : return [ 0 , 0 , 0 ,alpha]
+		case "gray"  : return [100,100,100,alpha]
+		case "white" : return [255,255,255,alpha]
+		case "red"   : return [255, 0 , 0 ,alpha]
+		case "green" : return [ 0 ,255, 0 ,alpha]
+		case "blue"  : return [ 0 , 0 ,255,alpha]
+		case "cyan"  : return [ 0 ,255,255,alpha]
+		case "yellow": return [255,255, 0 ,alpha]
+		case "orange": return [255,150, 0 ,alpha]
+		case "purple": return [150, 0 ,255,alpha]
+		case "pink"  : return [255,150,150,alpha]
+		# Custom palette goes now...
+		case "energeticblue": return [ 0 , 76,255,alpha]
+		case "moderngreen"  : return [ 0 ,255, 90,alpha]
+		case "lambdaorange" : return [243,123, 33,alpha]
+		case "basketball"   : return [252, 90, 3 ,alpha]
+		case "cuteypink"    : return [255,150,178,alpha]
 		case _: print("colorNameToList, " + name + ": not in match case!"); return [0,0,0,alpha]
 
 def in_box(check_x, check_y, area_x, area_y, area_width, area_height):
@@ -24,7 +35,7 @@ def in_box(check_x, check_y, area_x, area_y, area_width, area_height):
 		queue_line([area_x, area_y], [area_x, area_y + 5], "red", priority=2)
 		# Top-Right Corner
 		queue_line([area_x + area_width, area_y], [area_x + area_width - 5, area_y], "red", priority=2)
-		queue_line([area_x + area_width, area_y], [area_x + area_width, area_y - 5], "red", priority=2)
+		queue_line([area_x + area_width, area_y], [area_x + area_width, area_y + 5], "red", priority=2)
 		# Bottom-Left Corner
 		queue_line([area_x, area_y + area_height], [area_x + 5, area_y + area_height], "red", priority=2)
 		queue_line([area_x, area_y + area_height], [area_x, area_y + area_height - 5], "red", priority=2)
@@ -60,20 +71,36 @@ def calcTextSize(textLength: int) -> int:
 
 def clamp(n, minn, maxn): """Limits the number"""; return max(min(maxn, n), minn)
 
-def tween(start_value, end_value, duration):
-	start_time = time.time()
-	delta = end_value - start_value
-	duration /= 1000
+class Tween():
+	"""Advanced smoothing system. Provides `changeEndValue` and `update` functions to make dynamic animations."""
+	startValue = 0.0; endValue = 1.0; duration = 1.0
+	startTime = time.time()
+	delta = endValue - startValue
+	curValue = None
 
-	def update( *ignoreArgs ):
-		nonlocal start_value
-		elapsed = time.time() - start_time
-		if elapsed >= duration: return end_value
-		t = elapsed / duration
-		start_value = start_value + t * delta
-		return start_value
+	def __init__(self, startValue, endValue, duration):
+		self.startValue = startValue
+		self.endValue = endValue
+		self.duration = duration
+		self.delta = endValue - startValue
 
-	return update
+	def changeEndValue(self, newEndValue):
+		"""Changes the end value and resets the timer."""
+		if newEndValue == self.endValue: return
+		self.endValue = newEndValue
+		self.delta = newEndValue - self.startValue
+		self.startTime = time.time()
+		self.startValue = self.curValue
+
+	def update(self, *ignoreArgs ):
+		"""Updates and returns current value."""
+		elapsed = time.time() - self.startTime
+		if elapsed >= self.duration:
+			self.startValue = self.endValue
+			return self.endValue
+		t = elapsed / self.duration
+		self.curValue = self.startValue + t * self.delta
+		return self.startValue + t * self.delta
 
 def queue_draw(pos   : list[int,int] | list[float,float] = [ 0 , 0 ],
 			   size  : list[int,int] | list[float,float] = [100,100],
@@ -106,10 +133,14 @@ def queue_line(begin: list[int], end: list[int], color: list[int,int,int,int] | 
 	else: resultColor = color
 	deskinfo.drawingQueue[priority].append([2, begin, end, resultColor, shadowed])
 
-def queue_msg(message: str):
+def queue_msg(message: str, position: list[int, int] | None = None):
 	"""Creates a message that follows a cursor."""
-	queue_draw([deskinfo.mousePos[0] + 8 , deskinfo.mousePos[1] +  8], [calcTextSize(len(message)), 20], [255, 248, 156, 255], True, priority=2)
-	queue_text([deskinfo.mousePos[0] + 10, deskinfo.mousePos[1] + 10], "black", message, priority=2)
+	if position != None:
+		queue_draw([position[0], position[1]], [calcTextSize(len(message)), 20], [255, 248, 156, 255], True, priority=2)
+		queue_text([position[0], position[1]], "black", message, priority=2)
+	else:
+		queue_draw([deskinfo.mousePos[0] + 24, deskinfo.mousePos[1] + 24], [calcTextSize(len(message)), 20], [255, 248, 156, 255], True, priority=2)
+		queue_text([deskinfo.mousePos[0] + 24, deskinfo.mousePos[1] + 24], "black", message, priority=2)
 
 def alert(title: str, message: str):
 	"""**NOT DONE YET!**

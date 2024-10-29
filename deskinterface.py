@@ -16,8 +16,7 @@ class Elements():
 
 		def think(self):
 			deskfuncs.queue_draw([0, 0], [deskinfo.screenSize[0], deskinfo.screenSize[1] - 32], self.color)
-			for element in self.drawElements:
-				element.logic()
+			for element in self.drawElements: element.logic()
 
 
 	class Button(deskinfo.DeviceElement):
@@ -35,17 +34,14 @@ class Elements():
 			isHovered = deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], self.pos[0], self.pos[1], self.size[0], self.size[1])
 			if self.isHolding:
 				deskfuncs.queue_draw([self.pos[0], self.pos[1]], [self.size[0], self.size[1]], "black")
-				deskfuncs.queue_text([self.pos[0] + 2, self.pos[1]],
-									 color="white", text=self.label)
+				deskfuncs.queue_text([self.pos[0] + 2, self.pos[1]], color="white", text=self.label)
 			elif not isHovered:
 				deskfuncs.queue_draw([self.pos[0], self.pos[1]], [self.size[0], self.size[1]], "gray", self.shadows, "black")
-				deskfuncs.queue_text([self.pos[0] + 2, self.pos[1]],
-									 color="black", text=self.label)
+				deskfuncs.queue_text([self.pos[0] + 2, self.pos[1]], color="black", text=self.label)
 
 			if not self.isHolding and isHovered:
-				deskfuncs.queue_draw([self.pos[0], self.pos[1]], [self.size[0], self.size[1]], "blue")
-				deskfuncs.queue_text([self.pos[0], self.pos[1]],
-									 color="black", text=self.label)
+				deskfuncs.queue_draw([self.pos[0], self.pos[1]], [self.size[0], self.size[1]], "energeticblue")
+				deskfuncs.queue_text([self.pos[0], self.pos[1]], color="black", text=self.label)
 
 			if isHovered:
 				if deskinfo.clickOnce:
@@ -66,17 +62,17 @@ class Elements():
 				horizend = self.size[0] / len(self.pages) # * (idx + 1)
 				if deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], horizbegin, self.pos[1], horizend, self.pos[1] + self.size[1]):
 					if deskinfo.clickOnce: self.pageSwitched(idx)
-					deskfuncs.queue_draw([horizbegin, self.pos[1]], [int(self.size[0] / len(self.pages)), self.pos[1] + self.size[1]], "blue")
+					deskfuncs.queue_draw([horizbegin, self.pos[1]], [int(self.size[0] / len(self.pages)), self.pos[1] + self.size[1]], "energeticblue")
 				deskfuncs.queue_line([horizbegin, self.pos[1]],
 									 [horizbegin, self.pos[1] + self.size[1]],
 									 (0,0,0,255))
 				deskfuncs.queue_text([self.pos[0] + self.size[0] / len(self.pages) * idx + 4, self.pos[1] + 4], (0,0,0,255), text=page)
 			if self.currentPage != -1:
 				deskfuncs.queue_draw([self.pos[0] + (self.size[0] / len(self.pages)) * self.currentPage, self.pos[1] + self.size[1] / 1.5],
-									 [int(self.size[0] / len(self.pages) + 1), int(self.size[1] / 4)], "blue")
+									 [int(self.size[0] / len(self.pages) + 1), int(self.size[1] / 4)], "energeticblue")
 
 		def pageSwitched(self, index):
-			print("Page Switched!")
+			# print("Page Switched!")
 			if index == self.currentPage: self.currentPage = -1
 			else: index = self.currentPage
 
@@ -92,12 +88,12 @@ class Elements():
 			if self.callFunction is not None: self.callFunction(index)
 
 		def logic(self):
-			deskfuncs.queue_draw([self.pos[0], self.pos[1]], [self.size[0], self.size[1]], "white", border="black")
+			deskfuncs.queue_draw([self.pos[0], self.pos[1]], [self.size[0], self.size[1]], "white", border="black", shadowed=self.shadows)
 			for idx,item in enumerate(self.items):
-				if deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], self.pos[0], self.pos[1] + idx * 18, self.size[0], 18):
-					deskfuncs.queue_draw([self.pos[0], self.pos[1] + idx * 18], [self.size[0], 18], (0, 178, 255, 125), True)
+				if deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], self.pos[0], self.pos[1] + idx * 20, self.size[0], 20):
+					deskfuncs.queue_draw([self.pos[0], self.pos[1] + idx * 20], [self.size[0], 20], (0, 178, 255, 125), True)
 					if deskinfo.clickOnce: self.itemClicked(idx)
-				deskfuncs.queue_text([self.pos[0] + 3, self.pos[1] + (idx * 18)], "black", item)
+				deskfuncs.queue_text([self.pos[0] + 3, self.pos[1] + (idx * 20)], "black", item)
 
 
 	class Slider(deskinfo.DeviceElement):
@@ -108,28 +104,21 @@ class Elements():
 		max: float = 100.0
 		isHolding: bool = False
 		roundToDigits: int = 1
-		normalized_value = (current - min) / (max - min)
-		tweenValue1 = deskfuncs.tween(current, pos[0] + (normalized_value * size[0]) - 8, 10)
-		curTweenValue1 = tweenValue1()
 
 		def logic(self):
-			self.curTweenValue1 = self.tweenValue1()
-			self.normalized_value = (self.current - self.min) / (self.max - self.min)
 			deskfuncs.queue_draw(self.pos, self.size, "black")
 			if deskfuncs.in_box(deskinfo.mousePos[0], deskinfo.mousePos[1], self.pos[0], self.pos[1], self.size[0], self.size[1]) or self.isHolding:
 				if deskinfo.clickOnce: self.isHolding = True
-				deskfuncs.queue_draw([int(self.curTweenValue1), self.pos[1]], [16, self.size[1]], "blue", self.shadows)
+				deskfuncs.queue_draw([int(self.current + self.pos), self.pos[1]], [16, self.size[1]], "energeticblue", self.shadows)
 				deskfuncs.queue_msg(str(self.current if self.roundToDigits != 0 else int(self.current)))
-			else:
-				deskfuncs.queue_draw([int(self.curTweenValue1), self.pos[1]], [16, self.size[1]], "gray")
+			else: deskfuncs.queue_draw([int(self.current), self.pos[1]], [16, self.size[1]], "gray")
 			if self.isHolding and not deskinfo.mouseEvents[0]: self.isHolding = False
 			if self.isHolding:
 				oldCurrent = self.current
 				self.current = deskfuncs.clamp(round(((deskinfo.mousePos[0] - self.pos[0]) / self.size[0]) * self.max, self.roundToDigits), self.min, self.max)
 				self.currentChanged(oldCurrent)
 
-		def currentChanged(self, oldValue):
-			self.tweenValue1 = deskfuncs.tween(self.current, self.pos[0] + (self.normalized_value * self.size[0]) - 8, 10)
+		def currentChanged(self, oldValue): pass
 
 
 class EnhancedElements():
@@ -144,6 +133,7 @@ class EnhancedElements():
 			super().__init__()
 			self.listElement.items = self.options
 			self.listElement.callFunction = self.option_clicked
+			self.listElement.shadows = self.shadows
 
 		def logic(self):
 			super().logic()
@@ -151,13 +141,13 @@ class EnhancedElements():
 			if self.isHolding:
 				# We now check if list won't go outside the screen
 				# TOP-LEFT check
-				if not deskfuncs.out_of_screen_BOX(self.pos[0], self.pos[1] + self.size[1], self.listWidth, len(self.options) * 18):
+				if not deskfuncs.out_of_screen_BOX(self.pos[0], self.pos[1] + self.size[1], self.listWidth, len(self.options) * 20):
 					self.listElement.pos = [self.pos[0], self.pos[1] + self.size[1]]
-					self.listElement.size = [self.listWidth, len(self.options) * 18]
+					self.listElement.size = [self.listWidth, len(self.options) * 20]
 				# BOTTOM-RIGHT check
-				elif not deskfuncs.out_of_screen_BOX(self.pos[0] + self.size[0] - self.listWidth, self.pos[1] - len(self.options) * 18, self.listWidth, len(self.options) * 18):
-					self.listElement.pos = [self.pos[0] + self.size[0] - self.listWidth, self.pos[1] - len(self.options) * 18]
-					self.listElement.size = [self.listWidth, len(self.options) * 18]
+				elif not deskfuncs.out_of_screen_BOX(self.pos[0] + self.size[0] - self.listWidth, self.pos[1] - len(self.options) * 20, self.listWidth, len(self.options) * 20):
+					self.listElement.pos = [self.pos[0] + self.size[0] - self.listWidth, self.pos[1] - len(self.options) * 20]
+					self.listElement.size = [self.listWidth, len(self.options) * 20]
 
 				# Then we can give logic to list
 				self.listElement.logic()
@@ -177,6 +167,7 @@ class EnhancedElements():
 			super().__init__()
 			self.listElement.items = self.options
 			self.listElement.callFunction = self.wasChosen
+			self.listElement.shadows = self.shadows
 
 		def logic(self):
 			deskfuncs.queue_draw(self.pos, self.size)
@@ -187,16 +178,16 @@ class EnhancedElements():
 				# We now check if list won't go outside the screen
 				# TOP-LEFT check
 				if not deskfuncs.out_of_screen_BOX(self.pos[0], self.pos[1] + self.size[1], self.listWidth,
-												   len(self.options) * 18):
-					self.listElement.pos = [self.pos[0], self.pos[1] + self.size[1]]
-					self.listElement.size = [self.listWidth, len(self.options) * 18]
+												   len(self.options) * 20):
+					self.listElement.pos  = [self.pos[0], self.pos[1] + self.size[1]]
+					self.listElement.size = [self.listWidth, len(self.options) * 20]
 				# BOTTOM-RIGHT check
 				elif not deskfuncs.out_of_screen_BOX(self.pos[0] + self.size[0] - self.listWidth,
-													 self.pos[1] - len(self.options) * 18, self.listWidth,
-													 len(self.options) * 18):
-					self.listElement.pos = [self.pos[0] + self.size[0] - self.listWidth,
-											self.pos[1] - len(self.options) * 18]
-					self.listElement.size = [self.listWidth, len(self.options) * 18]
+													 self.pos[1] - len(self.options) * 20, self.listWidth,
+													 len(self.options) * 20):
+					self.listElement.pos  = [self.pos[0] + self.size[0] - self.listWidth,
+											 self.pos[1] - len(self.options) * 20]
+					self.listElement.size = [self.listWidth, len(self.options) * 20]
 
 				# Then we can give logic to list
 				self.listElement.logic()

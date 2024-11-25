@@ -1,13 +1,18 @@
-# Secton's Special Software License (3SL)
-Version 2.0
+# Secton's Special Software License (3SL-NonCommercial)
+Version 2.1 (Gamma)
 
 ## Preamble
+In short: You can use this software **only** non-commercially and with attribute to Secton (Boris Alexandrov).
+
 If you're planning on distributing the modified version of software binded with this license,
-then you must keep or add the attribution written below.
-If your modified version is used commercially, please contact Boris Alexandrov at {MY_MAIL}.
+then you must keep or add the attribution (or make a similar one) written below.
+If your modified version is used commercially, please contact Boris Alexandrov at licensing@secton.ru.
 Commercial modifications are allowed to not put the attribution.
 
-## License Grant
+This is a NonCommercial version of the license, meaning that you can't use this software in commercial cases
+with this license unless you have the Commercial (SCSL) version. Read more about it in 1st, 2nd and 5th sections of this license.
+
+## 0. License Grant
 Subject to the terms and conditions of this License, the original creator hereby
 grants you a non-exclusive, worldwide, royalty-free license to use, modify, and
 distribute the Software (including modified versions), subject to the following
@@ -18,7 +23,7 @@ You may use, modify, and distribute the Software for non-commercial purposes und
 the following conditions:
 
 * Attribution: You must give appropriate credit, provide a link to the original
-  creator's website, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the original creator endorses you or your use of the Software. One of the following attributions is required:
+  creator's website, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the original creator endorses you or your use of the Software. One of the following attributions is required (or can be similar to):
 
   > Original creator: Boris Alexandrov (https://secton.ru)
 
@@ -41,7 +46,7 @@ terms of this License, provided that you
 include the above attribution in all copies or substantial portions of the Software,
 and also in any modified versions that you distribute.
 
-## No Warranty
+## 4. No Warranty
 The Software is provided "as is", without warranty of any kind, express or implied,
 including but not limited to the warranties of merchantability, fitness for a
 particular purpose, and noninfringement. In no event shall the original creator be
@@ -49,13 +54,13 @@ liable for any claim, damages, or other liability, whether in an action of contr
 tort, or otherwise, arising from, out of, or in connection with the Software or the
 use or other dealings in the Software.
 
-## Special License Agreement
+## 5. Special License Agreement
 For commercial use or if you require a different type of license, please contact the
-original creator at https://secton.ru to discuss about a special license agreement.
+me at licensing@secton.ru to discuss about price for a special license agreement.
 
-## Attribution
+## 6. Attribution
 Every time you distribute the Software or any derivative works, you must include one
-of the following attributions in any materials that reference the Software, whether
+of the following attributions (or make a similar one) in any materials that reference the Software, whether
 distributed electronically, in print, or in any other form:
 
 > Original creator: Boris Alexandrov (https://secton.ru)
